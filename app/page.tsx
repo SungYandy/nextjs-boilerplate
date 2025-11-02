@@ -17,6 +17,23 @@ type ConversationMessage = {
   timestamp: string;
 };
 
+type TemperatureOption = {
+  value: number;
+  label: string;
+};
+
+type QuoteNoteTemplate = {
+  id: string;
+  label: string;
+  summary: string;
+};
+
+type PackageOption = {
+  id: string;
+  label: string;
+  details: string;
+};
+
 const personas: Persona[] = [
   {
     id: "specialist",
@@ -63,17 +80,97 @@ const defaultMessages: ConversationMessage[] = [
   },
 ];
 
+const temperatureOptions: TemperatureOption[] = [
+  { value: 0.2, label: "0.2 · Precision" },
+  { value: 0.4, label: "0.4 · Balanced" },
+  { value: 0.6, label: "0.6 · Conversational" },
+  { value: 0.8, label: "0.8 · Story-driven" },
+  { value: 1.0, label: "1.0 · Exploratory" },
+];
+
+const quoteNoteTemplates: QuoteNoteTemplate[] = [
+  {
+    id: "sentiment",
+    label: "Sentiment analysis pilot",
+    summary:
+      "Highlight the enterprise bundle, call out sentiment analysis, and confirm onboarding milestones.",
+  },
+  {
+    id: "automation",
+    label: "Automation expansion",
+    summary:
+      "Position workflow automation modules with premium reporting and shared success metrics.",
+  },
+  {
+    id: "renewal",
+    label: "Renewal uplift",
+    summary:
+      "Reinforce renewal pricing, include account growth recommendations, and outline support commitments.",
+  },
+];
+
+const primaryPackages: PackageOption[] = [
+  {
+    id: "enterprise",
+    label: "Enterprise plan · $2,499/mo",
+    details: "Full platform access, SSO, priority support",
+  },
+  {
+    id: "growth",
+    label: "Growth plan · $1,699/mo",
+    details: "Core modules, integrations, quarterly strategy sessions",
+  },
+  {
+    id: "pilot",
+    label: "Pilot plan · $1,199/mo",
+    details: "Limited seats, guided onboarding, success manager",
+  },
+];
+
+const addOnBundles: PackageOption[] = [
+  {
+    id: "sentiment",
+    label: "Sentiment analysis · $399/mo",
+    details: "Real-time voice of customer dashboards and alerts",
+  },
+  {
+    id: "analytics",
+    label: "Advanced analytics · $299/mo",
+    details: "Executive reporting and benchmarking insights",
+  },
+  {
+    id: "enablement",
+    label: "Enablement pack · $249/mo",
+    details: "Workshop series, certification seats, and playbooks",
+  },
+];
+
 export default function Home() {
   const [selectedPersona, setSelectedPersona] = useState<Persona>(personas[0]);
-  const [temperature, setTemperature] = useState(0.4);
+  const [temperature, setTemperature] = useState(temperatureOptions[1]?.value ?? 0.4);
   const [messages, setMessages] = useState(defaultMessages);
-  const [notes, setNotes] = useState(
-    "Include sentiment analysis add-on, premium reporting, and 90-day onboarding milestone.",
+  const [selectedNoteId, setSelectedNoteId] = useState<string>(quoteNoteTemplates[0]?.id ?? "");
+  const [selectedPrimaryPackageId, setSelectedPrimaryPackageId] = useState<string>(
+    primaryPackages[0]?.id ?? "",
   );
-  const [primaryPackage, setPrimaryPackage] = useState("Enterprise plan · $2,499/mo");
-  const [addOns, setAddOns] = useState("Sentiment analysis · $399/mo");
+  const [selectedAddOnId, setSelectedAddOnId] = useState<string>(addOnBundles[0]?.id ?? "");
   const [sendToCrm, setSendToCrm] = useState(true);
   const [needsReview, setNeedsReview] = useState(false);
+
+  const selectedNote = useMemo(
+    () => quoteNoteTemplates.find((template) => template.id === selectedNoteId) ?? quoteNoteTemplates[0],
+    [selectedNoteId],
+  );
+
+  const selectedPrimaryPackage = useMemo(
+    () => primaryPackages.find((pkg) => pkg.id === selectedPrimaryPackageId) ?? primaryPackages[0],
+    [selectedPrimaryPackageId],
+  );
+
+  const selectedAddOn = useMemo(
+    () => addOnBundles.find((pkg) => pkg.id === selectedAddOnId) ?? addOnBundles[0],
+    [selectedAddOnId],
+  );
 
   const insightCards = useMemo(
     () => [
@@ -92,8 +189,13 @@ export default function Home() {
         value: `${Math.round((1 - temperature) * 90 + 10)}% confidence`,
         helper: "Lower temperature yields more precise quotes",
       },
+      {
+        label: "Quote package",
+        value: selectedPrimaryPackage.label,
+        helper: selectedPrimaryPackage.details,
+      },
     ],
-    [selectedPersona, temperature],
+    [selectedPersona, temperature, selectedPrimaryPackage],
   );
 
   const handleDraftFollowUp = () => {
@@ -212,21 +314,20 @@ export default function Home() {
 
                 <label className="flex flex-col gap-2 text-sm">
                   <span className="font-medium text-slate-700 dark:text-slate-200">Temperature</span>
-                  <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-inner dark:border-slate-700 dark:bg-slate-900">
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.1}
-                      value={temperature}
-                      onChange={(event) => setTemperature(Number(event.target.value))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full bg-indigo-100 accent-indigo-600 dark:bg-indigo-500/30"
-                    />
-                    <div className="mt-2 flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span>Precise</span>
-                      <span>Creative</span>
-                    </div>
-                  </div>
+                  <select
+                    className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    value={temperature}
+                    onChange={(event) => setTemperature(Number(event.target.value))}
+                  >
+                    {temperatureOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    Select a calibrated creativity level for the agent response.
+                  </span>
                 </label>
               </div>
             </section>
@@ -251,33 +352,50 @@ export default function Home() {
               <div className="mt-6 grid gap-5 text-sm">
                 <label className="flex flex-col gap-2">
                   <span className="font-medium text-slate-700 dark:text-slate-200">Quote notes</span>
-                  <textarea
-                    rows={4}
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    placeholder="Summarize the solution, pricing tiers, and any custom add-ons."
-                    className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm leading-6 text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
+                  <select
+                    className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    value={selectedNoteId}
+                    onChange={(event) => setSelectedNoteId(event.target.value)}
+                  >
+                    {quoteNoteTemplates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs leading-5 text-slate-500 dark:text-slate-400">{selectedNote?.summary}</span>
                 </label>
 
                 <label className="flex flex-col gap-2">
                   <span className="font-medium text-slate-700 dark:text-slate-200">Primary package</span>
-                  <input
-                    type="text"
-                    value={primaryPackage}
-                    onChange={(event) => setPrimaryPackage(event.target.value)}
+                  <select
                     className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
+                    value={selectedPrimaryPackageId}
+                    onChange={(event) => setSelectedPrimaryPackageId(event.target.value)}
+                  >
+                    {primaryPackages.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{selectedPrimaryPackage?.details}</span>
                 </label>
 
                 <label className="flex flex-col gap-2">
                   <span className="font-medium text-slate-700 dark:text-slate-200">Add-ons</span>
-                  <input
-                    type="text"
-                    value={addOns}
-                    onChange={(event) => setAddOns(event.target.value)}
+                  <select
                     className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
+                    value={selectedAddOnId}
+                    onChange={(event) => setSelectedAddOnId(event.target.value)}
+                  >
+                    {addOnBundles.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">{selectedAddOn?.details}</span>
                 </label>
               </div>
 
