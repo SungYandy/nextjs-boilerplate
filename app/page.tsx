@@ -2,7 +2,27 @@
 
 import { useMemo, useState } from "react";
 
-const personas = [
+type Persona = {
+  id: string;
+  label: string;
+  description: string;
+  topGoals: string[];
+  painPoints: string[];
+};
+
+type QuoteNoteTemplate = {
+  id: string;
+  label: string;
+  summary: string;
+};
+
+type PackageOption = {
+  id: string;
+  label: string;
+  details: string;
+};
+
+const personas: Persona[] = [
   {
     id: "event-emma",
     label: "Event Planner Emma",
@@ -53,7 +73,7 @@ const personas = [
   },
 ];
 
-const quoteNoteTemplates = [
+const quoteNoteTemplates: QuoteNoteTemplate[] = [
   {
     id: "warm-intro",
     label: "Warm introduction",
@@ -74,7 +94,7 @@ const quoteNoteTemplates = [
   },
 ];
 
-const primaryPackages = [
+const primaryPackages: PackageOption[] = [
   {
     id: "starter-kit",
     label: "Starter kit",
@@ -92,7 +112,7 @@ const primaryPackages = [
   },
 ];
 
-const addOnBundles = [
+const addOnBundles: PackageOption[] = [
   {
     id: "analytics-upgrade",
     label: "Analytics upgrade",
@@ -109,6 +129,60 @@ const addOnBundles = [
     details: "Executive briefings, invite-only events, and branded concierge touchpoints.",
   },
 ];
+
+function MenuOption({
+  isActive,
+  label,
+  description,
+  onSelect,
+}: {
+  isActive: boolean;
+  label: string;
+  description: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full rounded-2xl border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-400 ${
+        isActive
+          ? "border-zinc-900 bg-zinc-900 text-zinc-50 shadow-sm dark:border-zinc-100"
+          : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:border-zinc-500"
+      }`}
+    >
+      <p className="text-sm font-semibold">{label}</p>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{description}</p>
+    </button>
+  );
+}
+
+function PackageMenuOption({
+  isActive,
+  label,
+  details,
+  onSelect,
+}: {
+  isActive: boolean;
+  label: string;
+  details: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`w-full rounded-2xl border p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-400 ${
+        isActive
+          ? "border-zinc-900 bg-zinc-900 text-zinc-50 shadow-sm dark:border-zinc-100"
+          : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:border-zinc-500"
+      }`}
+    >
+      <p className="text-sm font-semibold">{label}</p>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{details}</p>
+    </button>
+  );
+}
 
 export default function Home() {
   const [selectedPersonaId, setSelectedPersonaId] = useState(personas[0]?.id ?? "");
@@ -147,46 +221,41 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-50 py-16 text-zinc-950 dark:bg-black dark:text-zinc-50">
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6">
         <header className="flex flex-col gap-3 text-center sm:text-left">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Persona-driven Quote Builder
+            TheSystem© Quote Launcher
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Quickly assemble tailored quotes by pairing a core package with curated add-ons and client-ready copy.
+            Build an on-brand package in seconds. Pick a persona, blend in the right assets, and ship a polished deck
+            without leaving this screen.
           </p>
         </header>
 
-        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-sm dark:bg-zinc-900 dark:shadow-none md:grid-cols-3">
-          <div className="md:col-span-1">
-            <h2 className="text-lg font-semibold">Persona</h2>
+        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-sm dark:bg-zinc-900 dark:shadow-none lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <h2 className="text-lg font-semibold">Persona menu</h2>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-              Choose the profile that most closely matches your prospect to surface tailored insights.
+              Re-embed each buyer profile into your flow by choosing from the curated menu below.
             </p>
-            <label className="mt-4 block text-sm font-medium" htmlFor="persona-select">
-              Persona
-            </label>
-            <select
-              id="persona-select"
-              className="mt-1 w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-              value={selectedPersonaId}
-              onChange={(event) => setSelectedPersonaId(event.target.value)}
-            >
+            <nav className="mt-6 space-y-3" aria-label="Persona menu">
               {personas.map((persona) => (
-                <option key={persona.id} value={persona.id}>
-                  {persona.label}
-                </option>
+                <MenuOption
+                  key={persona.id}
+                  isActive={persona.id === selectedPersonaId}
+                  label={persona.label}
+                  description={persona.description}
+                  onSelect={() => setSelectedPersonaId(persona.id)}
+                />
               ))}
-            </select>
+            </nav>
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <div className="flex flex-col gap-4 rounded-2xl border border-zinc-100 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/60">
               <div>
                 <h3 className="text-lg font-semibold">{selectedPersona.label}</h3>
-                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  {selectedPersona.description}
-                </p>
+                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{selectedPersona.description}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -214,74 +283,76 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-sm dark:bg-zinc-900 dark:shadow-none md:grid-cols-2">
-          <div className="flex flex-col gap-6">
+        <section className="grid gap-6 rounded-3xl bg-white p-8 shadow-sm dark:bg-zinc-900 dark:shadow-none lg:grid-cols-[2fr,1fr]">
+          <div className="flex flex-col gap-8">
             <div>
-              <label className="block text-sm font-medium" htmlFor="quote-template-select">
-                Quote note template
-              </label>
-              <select
-                id="quote-template-select"
-                className="mt-2 w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-                value={selectedQuoteTemplateId}
-                onChange={(event) => setSelectedQuoteTemplateId(event.target.value)}
-              >
-                {quoteNoteTemplates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                {selectedQuoteTemplate.summary}
+              <h2 className="text-lg font-semibold">Quote builder menu</h2>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                Switch any tile to remix the tone, primary coverage, or the experiential add-ons before you deploy.
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium" htmlFor="primary-package-select">
-                Primary package
-              </label>
-              <select
-                id="primary-package-select"
-                className="mt-2 w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-                value={selectedPrimaryPackageId}
-                onChange={(event) => setSelectedPrimaryPackageId(event.target.value)}
-              >
-                {primaryPackages.map((pkg) => (
-                  <option key={pkg.id} value={pkg.id}>
-                    {pkg.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                {selectedPrimaryPackage.details}
-              </p>
-            </div>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Quote note templates
+                </h3>
+                <nav className="mt-3 space-y-3" aria-label="Quote note templates">
+                  {quoteNoteTemplates.map((template) => (
+                    <MenuOption
+                      key={template.id}
+                      isActive={template.id === selectedQuoteTemplateId}
+                      label={template.label}
+                      description={template.summary}
+                      onSelect={() => setSelectedQuoteTemplateId(template.id)}
+                    />
+                  ))}
+                </nav>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium" htmlFor="add-on-bundle-select">
-                Add-on bundle
-              </label>
-              <select
-                id="add-on-bundle-select"
-                className="mt-2 w-full rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-500 dark:focus:ring-zinc-700"
-                value={selectedAddOnBundleId}
-                onChange={(event) => setSelectedAddOnBundleId(event.target.value)}
-              >
-                {addOnBundles.map((bundle) => (
-                  <option key={bundle.id} value={bundle.id}>
-                    {bundle.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                {selectedAddOnBundle.details}
-              </p>
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Primary packages
+                </h3>
+                <nav className="mt-3 space-y-3" aria-label="Primary packages">
+                  {primaryPackages.map((pkg) => (
+                    <PackageMenuOption
+                      key={pkg.id}
+                      isActive={pkg.id === selectedPrimaryPackageId}
+                      label={pkg.label}
+                      details={pkg.details}
+                      onSelect={() => setSelectedPrimaryPackageId(pkg.id)}
+                    />
+                  ))}
+                </nav>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Add-on bundles
+                </h3>
+                <nav className="mt-3 space-y-3" aria-label="Add-on bundles">
+                  {addOnBundles.map((bundle) => (
+                    <PackageMenuOption
+                      key={bundle.id}
+                      isActive={bundle.id === selectedAddOnBundleId}
+                      label={bundle.label}
+                      details={bundle.details}
+                      onSelect={() => setSelectedAddOnBundleId(bundle.id)}
+                    />
+                  ))}
+                </nav>
+              </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-6 rounded-2xl border border-zinc-100 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/60">
-            <h3 className="text-lg font-semibold">Shareable quote summary</h3>
+            <div>
+              <h3 className="text-lg font-semibold">Shareable quote summary</h3>
+              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                Deploy this block into your doc or send it straight to a client chat.
+              </p>
+            </div>
             <div className="space-y-4 text-sm text-zinc-700 dark:text-zinc-300">
               <div>
                 <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">Persona</h4>
@@ -301,6 +372,16 @@ export default function Home() {
                 <p>{selectedAddOnBundle.label}</p>
                 <p className="text-zinc-600 dark:text-zinc-400">{selectedAddOnBundle.details}</p>
               </div>
+              <button
+                type="button"
+                className="w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                onClick={() => {
+                  // simple confirmation for deploy action
+                  alert("Quote deployed! TheSystem© is active — powered by Nextplanet Solutions!");
+                }}
+              >
+                Deploy this quote
+              </button>
             </div>
           </div>
         </section>
